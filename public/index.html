@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>QVAC Customer Complaint Response Writer</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #f5f7fa;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #1f2733;
+    display: flex;
+    justify-content: center;
+    padding: 48px 20px;
+  }
+  .wrap { width: 100%; max-width: 560px; }
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 14px rgba(20,30,60,0.08);
+    padding: 34px 36px;
+  }
+  .brand { font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; color: #2864c9; font-weight: 700; margin-bottom: 6px; }
+  h1 { font-size: 1.5rem; margin: 0 0 6px; color: #14203a; font-weight: 800; }
+  .subtitle { color: #5b6b85; font-size: 0.9rem; margin-bottom: 26px; }
+  .field-label { font-size: 0.78rem; color: #5b6b85; margin-bottom: 6px; font-weight: 600; }
+  textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e0;
+    background: #fbfcfe;
+    color: #1f2733;
+    font-family: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+    min-height: 100px;
+    resize: vertical;
+  }
+  textarea:focus { outline: none; border-color: #2864c9; }
+  button.action {
+    padding: 11px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: #2864c9;
+    color: #fff;
+  }
+  button.action:hover:not(:disabled) { background: #1f4fa0; }
+  button.action:disabled { opacity: 0.4; cursor: not-allowed; }
+  .status { margin-top: 14px; font-size: 0.85rem; color: #8592a8; min-height: 1.2em; }
+  .result-box {
+    margin-top: 22px;
+    padding: 18px 20px;
+    background: #eef3fc;
+    border-left: 3px solid #2864c9;
+    border-radius: 6px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #1f2733;
+  }
+  .footer-note { color: #8592a8; font-size: 0.78rem; text-align: center; margin-top: 22px; }
+  .spinner {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid #d6dfee;
+    border-top-color: #2864c9;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="brand">On-Device Support Assistant</div>
+      <h1>Customer Complaint Response Writer</h1>
+      <p class="subtitle">Paste a customer's complaint, get a professional, empathetic draft response.</p>
+
+      <div class="field-label">CUSTOMER'S COMPLAINT</div>
+      <textarea id="complaintInput" placeholder="e.g. I've emailed support twice about my broken login and haven't heard back in a week"></textarea>
+      <button class="action" id="generateBtn">Draft Response</button>
+      <div class="status" id="status"></div>
+      <div id="resultBox"></div>
+    </div>
+
+    <p class="footer-note">Everything runs locally on your machine. No text ever leaves this device.</p>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    const complaintInput = document.getElementById('complaintInput');
+    const generateBtn = document.getElementById('generateBtn');
+    const status = document.getElementById('status');
+    const resultBox = document.getElementById('resultBox');
+
+    async function generate() {
+      const complaint = complaintInput.value.trim();
+      if (!complaint) return;
+      generateBtn.disabled = true;
+      resultBox.innerHTML = '';
+      status.innerHTML = '<span class="spinner"></span>Drafting a response...';
+
+      try {
+        const res = await fetch('/api/respond', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ complaint }),
+        });
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        status.textContent = '';
+        resultBox.innerHTML = `<div class="result-box">${escapeHtml(data.response)}</div>`;
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+      } finally {
+        generateBtn.disabled = false;
+      }
+    }
+
+    generateBtn.addEventListener('click', generate);
+  </script>
+</body>
+</html>
