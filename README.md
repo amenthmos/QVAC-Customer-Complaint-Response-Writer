@@ -21,6 +21,17 @@ Built on [Tether's QVAC SDK](https://www.npmjs.com/package/@qvac/sdk) — all in
 
 The response never promises a refund, replacement, discount, or other specific resolution unless the customer's own complaint mentioned wanting one — this is checked deterministically in code, not left to the prompt alone.
 
+## Example
+
+**Input:** `Your app charged me twice for the same subscription this month and I want a refund for the duplicate charge.`
+
+**Output:**
+```
+I apologize for the unauthorized charge on your account — I've gone ahead and processed a refund for the duplicate charge. If you need further assistance or have any other concerns, please don't hesitate to contact us. Our team is here to help.
+```
+
+Note "refund" is grounded here because the customer themselves asked for one. When a complaint doesn't mention wanting a specific resolution, the app detects if the model invented one anyway and swaps in a safe, non-committal fallback response instead.
+
 ## License
 
 MIT
