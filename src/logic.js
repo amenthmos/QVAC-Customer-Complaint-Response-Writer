@@ -40,7 +40,11 @@ const RESOLUTION_KEYWORDS = [
 function inventedResolution(outputText, inputText) {
   const outLower = outputText.toLowerCase();
   const inLower = inputText.toLowerCase();
-  return RESOLUTION_KEYWORDS.some((kw) => outLower.includes(kw) && !inLower.includes(kw.split(" ")[0]));
+  // Match the FULL keyword phrase in the input, not just its first word —
+  // checking only kw.split(" ")[0] let "store credit" pass as grounded
+  // whenever the complaint merely contained the unrelated word "store"
+  // (e.g. "the store was closed"), which defeats the point of the check.
+  return RESOLUTION_KEYWORDS.some((kw) => outLower.includes(kw) && !inLower.includes(kw));
 }
 
 const FALLBACK = (complaint) =>
